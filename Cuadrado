@@ -1,0 +1,71 @@
+.data
+frameBuffer: .space 0x80000        # Espacio para la pantalla (512 x 256, 4 bytes por píxel)
+color: .word 0xFFFFFFFF             # Color blanco para los bloques
+newline: .asciiz "\n"
+
+.text
+
+
+main:
+    # Configuración inicial
+    li $a1, 20               # Ancho de cada bloque
+    li $a3, 20               # Altura de los bloques
+    lw $t0, color            # Cargar color blanco
+
+    # Posición inicial de la barra
+    li $t1, 400              # Límite derecho
+    mul $t2, $a1, 10         # Ancho total de los bloques
+    sub $t2, $t1, $t2
+    srl $a0, $t2, 1          # Centrar
+    li $a2, 180              # Posición vertical
+
+    li $t5, 10               # Contador de bloques
+
+cargarBloques_Loop:
+    # Dibujar un bloque
+    jal rectangle
+
+    # Delay entre bloques
+    li $v0, 32
+    li $t3, 500000
+    syscall
+
+    # Mover al siguiente bloque
+    addi $a0, $a0, 30
+
+    # Reducir contador de bloques y verificar
+    subi $t5, $t5, 1
+    bgtz $t5, cargarBloques_Loop
+
+    j end
+
+# Subrutina para dibujar un bloque
+rectangle:
+    move $t6, $a3            # Altura del bloque
+
+    sll $t1, $a0, 2          # Escalar X
+    sll $t2, $a1, 2          # Escalar ancho
+    sll $t3, $a2, 9          # Escalar Y
+
+    la $t4, frameBuffer
+    addu $t4, $t4, $t3
+    addu $t4, $t4, $t1
+
+rectangleYLoop:
+    move $t7, $t4
+    add $t8, $t4, $t2
+
+rectangleXLoop:
+    sw $t0, 0($t7)           # Escribir el color en el framebuffer
+    addiu $t7, $t7, 4
+    bne $t7, $t8, rectangleXLoop
+
+    addiu $t4, $t4, 2048     # Mover a la siguiente fila (512 píxeles * 4 bytes por píxel)
+    subi $t6, $t6, 1
+    bgtz $t6, rectangleYLoop
+
+    jr $ra                    # Retornar
+end:
+    # Salir del programa
+    li $v0, 10
+    syscall
