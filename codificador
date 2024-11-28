@@ -1,0 +1,38 @@
+codificar:
+    # Leer el texto del usuario
+    la $a0, Mensaje
+    li $v0, 4
+    syscall
+
+    la $a0, Espacio
+    li $v0, 8
+    li $a1, 100
+    syscall
+
+    # Leer la clave
+    la $a0, Clave
+    li $v0, 4
+    syscall
+
+    li $v0, 5
+    syscall
+    move $t1, $v0
+
+    # Dibujar la barra de carga
+    jal cargarBloques
+
+    # Codificar el texto
+    la $a0, Espacio
+    la $a1, SalidaEspacio
+    jal CodificarA
+
+    # Imprimir texto codificado
+    la $a0, TextoCodificado
+    li $v0, 4
+    syscall
+
+    la $a0, SalidaEspacio
+    li $v0, 4
+    syscall
+
+    j BucleMenu
