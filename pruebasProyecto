@@ -1,0 +1,75 @@
+.data
+# Texto de carga
+loading_text: .asciiz "LOADING.."
+
+# Configuración de la barra
+x_start: .word 100         # Coordenada inicial x
+y_start: .word 150         # Coordenada inicial y
+bar_width: .word 300       # Ancho total de la barra
+bar_height: .word 20       # Altura de la barra
+steps: .word 30            # Número de pasos de la barra
+
+delay_count: .word 500000  # Delay para animación
+
+.text
+.globl main
+
+main:
+    # Inicializar pantalla gráfica
+    li $v0, 32             # Syscall: Activar pantalla gráfica
+    li $a0, 1              # Activar modo gráfico
+    syscall
+
+    # Imprimir texto "LOADING.."
+    li $v0, 4              # Syscall para imprimir texto
+    la $a0, loading_text   # Cargar dirección del texto
+    syscall
+
+    # Dirección base de memoria gráfica
+    la $t9, 0x10008000     # Base del Bitmap Display en $t9
+
+    # Configurar parámetros de la barra
+    lw $t0, x_start        # Coordenada x inicial
+    lw $t1, y_start        # Coordenada y inicial
+    lw $t2, bar_width      # Ancho total de la barra
+    lw $t3, bar_height     # Altura de la barra
+    lw $t4, steps          # Número de pasos
+
+    # Calcular ancho por paso
+    div $t2, $t4           # t2 = ancho total / pasos
+    mflo $t5               # Ancho de cada paso
+
+    li $t6, 0              # Contador de progreso
+
+progress_loop:
+    # Dibujar un rectángulo por cada paso
+    move $a0, $t0          # Coordenada x inicial del paso
+    move $a1, $t1          # Coordenada y inicial
+    add $a2, $t0, $t5      # x final = x inicial + ancho del paso
+    add $a3, $t1, $t3      # y final = y inicial + altura de la barra
+    li $v0, 35             # Syscall: Dibujar Rectángulo en memoria gráfica
+    move $a2, $t9          # Dirección base de memoria gráfica
+    li $a3, 0x000000       # Color negro para la barra de carga
+    syscall
+
+    # Incrementar x para el próximo paso
+    add $t0, $t0, $t5
+
+    # Delay para animación
+    li $t7, 0
+delay:
+    lw $t8, delay_count
+    bge $t7, $t8, delay_done
+    addi $t7, $t7, 1
+    j delay
+delay_done:
+
+    # Incrementar contador de pasos
+    addi $t6, $t6, 1
+    bne $t6, $t4, progress_loop # Continuar hasta completar
+
+    # Fin del programa
+    li $v0, 10            # Syscall: Salir del programa
+    syscall
+
+
