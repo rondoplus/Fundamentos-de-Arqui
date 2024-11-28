@@ -1,0 +1,44 @@
+CodificarA:
+    li $t2, 0
+CodificarA_Bucle:
+    lb $t3, 0($a0)
+    beqz $t3, CodificarA_done
+    addi $a0, $a0, 1
+
+    li $t4, 65
+    li $t5, 90
+    li $t6, 97
+    li $t7, 122
+
+    bge $t3, $t4, Verificar1
+    j Guardar_Caracter
+Verificar1:
+    ble $t3, $t5, CodificarA_1
+    j Verificar2
+CodificarA_1:
+    sub $t3, $t3, $t4
+    add $t3, $t3, $t1
+    rem $t3, $t3, 26
+    add $t3, $t3, $t4
+    j Guardar_Caracter
+
+Verificar2:
+    bge $t3, $t6, Verificar2_Rango
+    j Guardar_Caracter
+Verificar2_Rango:
+    ble $t3, $t7, CodificarA_2
+    j Guardar_Caracter
+CodificarA_2:
+    sub $t3, $t3, $t6
+    add $t3, $t3, $t1
+    rem $t3, $t3, 26
+    add $t3, $t3, $t6
+
+Guardar_Caracter:
+    sb $t3, 0($a1)
+    addi $a1, $a1, 1
+    j CodificarA_Bucle
+
+CodificarA_done:
+    sb $zero, 0($a1)
+    jr $ra
