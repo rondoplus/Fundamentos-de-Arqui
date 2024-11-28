@@ -1,0 +1,39 @@
+decodificar:
+    # Leer el texto codificado
+    la $a0, TextoCodificado_dos
+    li $v0, 4
+    syscall
+
+    la $a0, Espacio
+    li $v0, 8
+    li $a1, 100
+    syscall
+
+    # Leer la clave
+    la $a0, TextoParaDecodificar
+    li $v0, 4
+    syscall
+
+    li $v0, 5
+    syscall
+    move $t1, $v0
+    neg $t1, $t1
+
+    # Dibujar la barra de carga
+    jal cargarBloques
+
+    # Decodificar el texto
+    la $a0, Espacio
+    la $a1, SalidaEspacio
+    jal CodificarA
+
+    # Imprimir texto decodificado
+    la $a0, TextoDecodificado
+    li $v0, 4
+    syscall
+
+    la $a0, SalidaEspacio
+    li $v0, 4
+    syscall
+
+    j BucleMenu
